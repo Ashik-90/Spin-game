@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guruji Ka Spinner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            margin-top: 50px;
+            color: #333;
+        }
+        .wheel-container {
+            margin: 20px auto;
+            width: 300px;
+            height: 300px;
+            position: relative;
+            border-radius: 50%;
+            border: 10px solid #333;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            background: conic-gradient(
+                #f00 0% 14.28%, /* Red */
+                #0f0 14.28% 28.56%, /* Green */
+                #00f 28.56% 42.84%, /* Blue */
+                #ff0 42.84% 57.12%, /* Yellow */
+                #f0f 57.12% 71.4%, /* Magenta */
+                #f5a 71.4% 85.68%, /* Light Pink */
+                #0ff 85.68% 100% /* Cyan */
+            );
+            transition: transform 0.5s ease-out; /* Smooth transition when stopping */
+        }
+        .wheel div {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #fff;
+            font-weight: bold;
+            transform-origin: 100% 100%;
+            overflow: hidden;
+        }
+        .wheel div span {
+            display: block;
+            transform: rotate(-90deg);
+            white-space: nowrap;
+        }
+        .compass {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid #333;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+        .button-container {
+            margin: 20px;
+        }
+        .spin-button, .stop-button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        .spin-button:hover, .stop-button:hover {
+            background-color: #555;
+        }
+        .result {
+            font-size: 24px;
+            color: #333;
+            margin-top: 20px;
+        }
+        .spin-button:disabled, .stop-button:disabled {
+            background-color: #888;
+            cursor: not-allowed;
+        }
+
+        /* Popup Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Munny game</h1>
+    <div class="wheel-container">
+        <div class="compass"></div>
+        <div class="wheel" id="wheel">
+            <!-- Spinner sections with labels -->
+            
+        </div>
+    </div>
+    <div class="button-container">
+        <button class="spin-button" id="spinButton" onclick="startSpin()">Spin Wheel</button>
+        <button class="stop-button" id="stopButton" onclick="stopSpin()">Stop Wheel</button>
+    </div>
+    <div class="result" id="result">I am</div>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h1>One and only Munny</h1>
+            <img src="https://linuxsimply.com/wp-content/uploads/2023/09/Monira-Akter-Munny-II-240x300.png" height="500px" width="400px" alt="Jackpot Image">
+        </div>
+    </div>
+
+    <script>
+        let spinning = false;
+        let spinDegree = 0;
+        let wheel = document.getElementById('wheel');
+        let spinButton = document.getElementById('spinButton');
+        let stopButton = document.getElementById('stopButton');
+        let resultText = document.getElementById('result');
+        let spinInterval;
+        let currentRotation = 0;
+
+        // Get the modal
+        let modal = document.getElementById("myModal");
+        // Get the <span> element that closes the modal
+        let span = document.getElementsByClassName("close")[0];
+
+        function startSpin() {
+            if (spinning) return;
+
+            spinning = true;
+            spinButton.disabled = true;
+            stopButton.disabled = false;
+
+            // Apply a continuous rotation speed of 2 rotations per second
+            wheel.style.transition = 'none'; // Remove any existing transition
+            spinInterval = setInterval(() => {
+                currentRotation += 5; // Increment rotation
+                wheel.style.transform = `rotate(${currentRotation}deg)`;
+            }, 10); // Update every 10ms
+
+            // Smoothly stop the spinning when the stop button is pressed
+            wheel.dataset.spinning = 'true';
+        }
+
+        function stopSpin() {
+            if (!spinning) return;
+
+            spinning = false;
+            clearInterval(spinInterval);
+
+            // Smoothly stop the wheel
+            wheel.style.transition = 'transform 0.5s ease-out';
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            // Calculate the result based on the final degree
+            setTimeout(() => {
+                const degrees = (currentRotation % 360);
+                const segmentAngle = 360 / 7; // Each segment spans 51.42 degrees
+                const segmentIndex = Math.floor((degrees + segmentAngle / 2) / segmentAngle) % 7;
+                const options = ["Mighty", "Magnificent", "Magnetic", "Magical", "Modern", "Mystic", "One and only"];
+                const result = options[segmentIndex];
+                resultText.innerText = `I'm ${result} Munny`;
+
+                // Show the popup if "Pyaar" is selected
+                if (result === "One and only") {
+                    modal.style.display = "block";
+                }
+                
+                // Re-enable the spin button after stopping
+                spinButton.disabled = false;
+                stopButton.disabled = true;
+            }, 500); // Delay to match the duration of the stop animation
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
